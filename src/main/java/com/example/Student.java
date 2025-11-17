@@ -1,5 +1,8 @@
 package com.example;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,19 +10,13 @@ import java.util.Objects;
 
 public class Student {
 
+    @Getter
+    @Setter
     private String name;
     private List<Integer> grades= new ArrayList<>();
 
     public Student(String name) {
         this.name = name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     /**
