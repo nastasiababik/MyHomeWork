@@ -8,7 +8,7 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode
 public class StudentMock {
-    @Getter @Setter
+    @Setter @Getter
     private String name;
     @Setter @Getter
     private StudentRepo repo;
@@ -40,7 +40,6 @@ public class StudentMock {
         this.repo = repo;
     }
 
-
     public List<Integer> getMarks() {
         return new ArrayList<>(marks);
     }
@@ -58,6 +57,7 @@ public class StudentMock {
     //Использую isValidateGrade из заглушки сервиса GradeCheckerServiceMock
     @SneakyThrows
     public void addGrade(int grade) {
+        System.out.println("grades = " + grades);
         if (!gradeChecker.isValidGrade(grade)) { //Проверка через метод мока
             throw new IllegalArgumentException(grade + " is wrong grade");
         }
