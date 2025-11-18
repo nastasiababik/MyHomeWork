@@ -17,7 +17,7 @@ public class StudentMockTest {
      * правильные оценки попадают в список оценок, а неправильные нет.
     */
 
-    @DisplayName("Проверка, что оценки попадают в список оценок, а неправильные нет")
+    @DisplayName("Проверка, что 2-5 оценки попадают в список оценок, а за границам диапазона нет")
     @Test
     public void testCheckGrade(){
         StudentMock stud = new StudentMock("Barsik", new GradeCheckerServiceMock());
