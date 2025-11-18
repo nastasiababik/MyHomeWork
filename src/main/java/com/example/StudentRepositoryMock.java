@@ -1,7 +1,7 @@
 package com.example;
 
 public class StudentRepositoryMock implements StudentRepo{
-    public int getRaintingForGradeSum(int sum){
+    public int getRatingForGradeSum(int sum){
         if(sum>50) return 9;
         return 10;
     }
