@@ -84,8 +84,6 @@ public class RestTests {
         StudentData student = new StudentData(id,"Вася", List.of(5));
         Response createResponse = postStudent(student);
 
-        System.out.println("Deleting student with ID: " + student.getId());
-
         Response deleteResponse = deleteStudent(student.getId());
         /* Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
         assertEquals(ContentType.JSON.toString(), response.getHeader("Content-Type"));
