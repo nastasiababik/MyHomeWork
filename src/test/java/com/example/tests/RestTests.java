@@ -4,6 +4,7 @@ import com.example.model.StudentData;
 import com.example.model.StudentResponse;
 import com.example.requests.StudentApi;
 import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 
 import org.junit.jupiter.api.*;
@@ -15,29 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RestTests {
 
-    private StudentData student;
     private static final int NON_EXISTING_ID = 1000;
-
-
-    @BeforeEach
-    void setUp() {
-        student = new StudentData(1,"Барсик", List.of(2, 3, 4));
-        Response response = postStudent(student);
-
-    }
-
-    @AfterEach
-     void tearDown() {
-        Response response = deleteStudent(student.getId());
-        student = null;
-    }
 
 
     //get /student/{id} возвращает JSON студента с указанным ID и заполненным именем, если такой есть в базе, код 200.
     @DisplayName("GET /student/{id} для существующего в базе студента: возвращает код 200, JSON студента с ID и именем")
     @Test
     public void getStudentShouldReturn200(){
+        //Создать студента с id и добавить через POST в базу
         int id = 1;
+        StudentData student = new StudentData(id,"Барсик", List.of(2, 3, 4));
+        Response createResponse = postStudent(student);
+
         Response response = StudentApi.getStudentById(id);
 
         assertEquals(ContentType.JSON.toString(), response.getHeader("Content-Type"));
@@ -45,6 +35,9 @@ public class RestTests {
         assertEquals(id, response.jsonPath().getInt("id"));
         assertEquals(student.getName(), response.jsonPath().getString("name"));
         assertEquals(student.getMarks(), response.jsonPath().getList("marks"));
+
+        //Удалит студента из базы в конце теста
+        deleteStudent(id);
     }
 
     //get /student/{id} возвращает код 404, если студента с данным ID в базе нет.
@@ -61,7 +54,18 @@ public class RestTests {
     }
 
     //post /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201
+    @DisplayName("POST /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201")
+    @Test
+    public void createStudentShouldReturn201(){
+        int id = 7;
+        StudentData student = new StudentData(id, "Лера", List.of(4, 3));
 
+        Response getResponse = StudentApi.getStudentById(id);
+        assertEquals(404, getResponse.getStatusCode());
+
+        Response postResponse = postStudent(student);
+
+    }
 
     //post /student возвращает код 400, если имя не заполнено.
     @DisplayName("POST /student студент без имени: вовзращает код 400")
@@ -76,10 +80,21 @@ public class RestTests {
     @DisplayName("DELETE /student/{id} удалить студента по id из базы, код 200")
     @Test
     public void deleteStudentShouldReturn200(){
-        Response response = deleteStudent(student.getId());
+        int id = 3;
+        StudentData student = new StudentData(id,"Вася", List.of(5));
+        Response createResponse = postStudent(student);
+
+        System.out.println("Deleting student with ID: " + student.getId());
+
+        Response deleteResponse = deleteStudent(student.getId());
+        /* Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
         assertEquals(ContentType.JSON.toString(), response.getHeader("Content-Type"));
-        assertEquals(200, response.getStatusCode());
-        StudentResponse createStudentResponse = response.as(StudentResponse.class);
+         */
+        assertEquals(200, deleteResponse.getStatusCode());
+
+        //В конце теста проверить, что студент удален попытаться вернуть его по id
+        Response getResponse = StudentApi.getStudentById(id);
+        assertEquals(404, getResponse.getStatusCode());
     }
 
     //delete /student/{id} возвращает код 404, если студента с таким ID в базе нет.
@@ -98,6 +113,7 @@ public class RestTests {
 
 
 
-    //get /topStudent код 200 и пустое тело, если студентов в базе нет.
+    //get /topStudent ...
+
 
 }

@@ -30,7 +30,7 @@ public class StudentApi {
     public static Response deleteStudent(int id){
         return given()
                 .contentType(ContentType.JSON)
-                .get(BASE_URL + EndpointPath.STUDENT.getPath() + "/" +id);
+                .delete(BASE_URL + EndpointPath.STUDENT.getPath() + "/" +id);
     }
 
     public static Response topStudent(StudentData student){
