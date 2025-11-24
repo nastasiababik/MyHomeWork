@@ -1,1 +1,1 @@
-Учебный проект на Maven + JUnit + Jococo + Java 17
+Учебный проект на Maven + JUnit + RestAssured + Jococo + Java 17
