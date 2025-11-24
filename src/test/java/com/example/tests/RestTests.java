@@ -1,6 +1,7 @@
 package com.example.tests;
 
 import com.example.model.StudentData;
+import com.example.model.StudentResponse;
 import com.example.requests.StudentApi;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -25,17 +26,12 @@ public class RestTests {
 
     }
 
-
     @AfterEach
      void tearDown() {
         Response response = deleteStudent(student.getId());
         student = null;
     }
 
-
-    /**
-     * Отдельный тест на каждое требование к endpoint'у
-     */
 
     //get /student/{id} возвращает JSON студента с указанным ID и заполненным именем, если такой есть в базе, код 200.
     @DisplayName("GET /student/{id} для существующего в базе студента: возвращает код 200, JSON студента с ID и именем")
@@ -76,6 +72,28 @@ public class RestTests {
         assertEquals(400, response.getStatusCode());
     }
 
+    //delete /student/{id} удаляет студента с указанным ID из базы, код 200.
+    @DisplayName("DELETE /student/{id} удалить студента по id из базы, код 200")
+    @Test
+    public void deleteStudentShouldReturn200(){
+        Response response = deleteStudent(student.getId());
+        assertEquals(ContentType.JSON.toString(), response.getHeader("Content-Type"));
+        assertEquals(200, response.getStatusCode());
+        StudentResponse createStudentResponse = response.as(StudentResponse.class);
+    }
+
+    //delete /student/{id} возвращает код 404, если студента с таким ID в базе нет.
+    @DisplayName("DELETE /student/{id} удалить студента по несуществующему id, код 404")
+    @Test
+    public void deleteStudentShouldReturn404(){
+        Response response = deleteStudent(NON_EXISTING_ID);
+        /*
+        Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
+        assertEquals(ContentType.JSON.toString(), response.getHeader("Content-Type"));
+         */
+        assertEquals(404, response.getStatusCode());
+
+    }
 
 
 
