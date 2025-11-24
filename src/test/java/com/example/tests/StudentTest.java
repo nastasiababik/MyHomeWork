@@ -1,4 +1,5 @@
-package com.example;
+package com.example.tests;
+import com.example.Student;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -216,14 +217,5 @@ public class StudentTest {
                 stud.addGrade(x));
     }
 
-}
-
-/**
- * Я добавила тест дату -5 для проверки отрицательных чисел в пример из урока
- */
-class GradeInvalidSource{
-    public static List<Integer> ints(){
-        return List.of(0, 1, 6, 7, -5);
-    }
 }
 

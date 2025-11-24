@@ -1,5 +1,6 @@
-package com.example;
+package com.example.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,11 +8,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+@Getter @Setter
 public class StudentData {
-    @Setter @Getter
+    @JsonProperty
     private Integer id; // id может быть null
-    @Setter @Getter
+    @JsonProperty
     private String name; // Обязательное поле
+    @JsonProperty
     private List<Integer> marks; //может быть пустым, содержать числа или быть null.
 
     public StudentData() {};
@@ -35,7 +38,7 @@ public class StudentData {
         return Collections.unmodifiableList(marks);
 
         // Возвращаем неизменяемый список или null
-        /**
+        /*
         return (marks != null)
                 ? Collections.unmodifiableList(marks)
                 : null;
@@ -52,6 +55,7 @@ public class StudentData {
     @Override
     public int hashCode() {
         int hash = 7;
+        hash = 13 * hash + Objects.hashCode(this.id);
         hash = 13 * hash + Objects.hashCode(this.name);
         hash = 13 * hash + Objects.hashCode(this.marks);
         return hash;
@@ -69,6 +73,9 @@ public class StudentData {
             return false;
         }
         final StudentData other = (StudentData) obj;
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
         if (!Objects.equals(this.name, other.name)) {
             return false;
         }
