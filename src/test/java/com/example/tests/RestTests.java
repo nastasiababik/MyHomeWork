@@ -14,6 +14,7 @@ import java.util.Random;
 
 import static com.example.requests.StudentApi.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class RestTests {
     private int id;
@@ -26,6 +27,15 @@ public class RestTests {
         assertEquals(student.getId(), payload.getId());
         assertEquals(student.getName(), payload.getName());
         assertEquals(student.getMarks(), payload.getMarks());
+    }
+
+    /*
+    Метод, который извлекает payload из переданного типа респонса и сравнивает его с созданным студентом.
+    Название пока не придумала
+    */
+    private void myTestMethod(Response response, StudentData student){
+        StudentResponse payload = response.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
+        assertStudentDataEquals(student, payload);
     }
 
     @BeforeEach
@@ -58,8 +68,13 @@ public class RestTests {
 
         assertEquals(ContentType.JSON.toString(), getResponse.getHeader("Content-Type"));
         assertEquals(200, getResponse.getStatusCode());
+
+        myTestMethod(getResponse, student);
+        /*
         StudentResponse payload = getResponse.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
         assertStudentDataEquals(student, payload);
+
+         */
     }
 
     @DisplayName("2. GET /student/{id} для несуществующего в базе ID-студента: возвращает код 404")
@@ -74,8 +89,7 @@ public class RestTests {
 
     }
 
-    //post /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201
-    @DisplayName("POST /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201")
+    @DisplayName("4. POST /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201")
     @Test
     public void createStudentShouldReturn201(){
         StudentData student = new StudentData(id, "Лера", List.of(4, 3));
@@ -86,13 +100,30 @@ public class RestTests {
         assertEquals(201, postResponse.getStatusCode());
 
         Response getResponseAfterCreate = StudentApi.getStudentById(id);
+        myTestMethod(getResponseAfterCreate, student);
+        /*
         StudentResponse payload = getResponseAfterCreate.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
         assertStudentDataEquals(student, payload);
+         */
 
     }
 
-    //post /student возвращает код 400, если имя не заполнено.
-    @DisplayName("POST /student студент без имени: вовзращает код 400")
+    @DisplayName("5. POST /student добавляет студента в базу: если ID равен null, сервер назначает ID, код 201")
+    @Test
+    public void createStudentWithNullIdShouldReturn201() {
+        StudentData student = new StudentData(null, "Вика", List.of(4, 3));
+        Response postResponse = postStudent(student);
+        assertEquals(201, postResponse.getStatusCode());
+
+        int returnId = postResponse.getBody().jsonPath().getInt(""); //POST возвращает просто число 99658
+
+        Response getResponse = StudentApi.getStudentById(returnId);
+        assertEquals(200, getResponse.getStatusCode());
+        assertEquals(student.getName(), getResponse.getBody().jsonPath().getString("name"));
+        assertEquals(student.getMarks(), getResponse.getBody().jsonPath().getList("marks"));
+    }
+
+    @DisplayName("6. POST /student студент без имени: вовзращает код 400")
     @Test
     public void createStudentShouldReturn400(){
         StudentData nonameStudent = new StudentData(id, null, List.of(2,5));
@@ -100,12 +131,11 @@ public class RestTests {
         assertEquals(400, response.getStatusCode());
     }
 
-    //delete /student/{id} удаляет студента с указанным ID из базы, код 200.
-    @DisplayName("DELETE /student/{id} удалить студента по id из базы, код 200")
+    @DisplayName("7. DELETE /student/{id} удалить студента по id из базы, код 200")
     @Test
     public void deleteStudentShouldReturn200(){
         StudentData student = new StudentData(id,"Вася", List.of(5));
-        Response createResponse = postStudent(student);
+        Response createStudentResponse = postStudent(student);
 
         Response deleteResponse = deleteStudent(student.getId());
         /* Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
@@ -118,8 +148,7 @@ public class RestTests {
         assertEquals(404, getResponse.getStatusCode());
     }
 
-    //delete /student/{id} возвращает код 404, если студента с таким ID в базе нет.
-    @DisplayName("DELETE /student/{id} удалить студента по несуществующему id, код 404")
+    @DisplayName("8. DELETE /student/{id} удалить студента по несуществующему id, код 404")
     @Test
     public void deleteStudentShouldReturn404(){
         Response response = deleteStudent(NON_EXISTING_ID);
