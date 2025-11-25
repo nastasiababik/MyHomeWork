@@ -1,6 +1,7 @@
 package com.example.requests;
 
 import com.example.model.StudentData;
+import com.example.model.StudentResponse;
 import com.example.utils.EndpointPath;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
