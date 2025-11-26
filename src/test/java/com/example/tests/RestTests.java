@@ -138,8 +138,7 @@ public class RestTests {
     @DisplayName("7. DELETE /student/{id} удалить студента по id из базы, код 200")
     @Test
     public void deleteStudentShouldReturn200(){
-        StudentData student = new StudentData(id,"Вася", List.of(5));
-        postStudent(student);
+        StudentData student = createStudentDB(id,"Вася", List.of(5));
 
         Response deleteResponse = deleteStudent(student.getId());
         /* Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
@@ -178,11 +177,8 @@ public class RestTests {
     @DisplayName("10. GET /topStudent: код 200 и пустое тело, если ни у одного студента нет оценок")
     @Test
     public void getTopStudentWhenNoStudentHasMarks() {
-        StudentData studentFirst = new StudentData(id, "Барсик",null);
-        StudentData studentSecond = new StudentData(id + 1, "Ляля", List.of());
-
-        postStudent(studentFirst);
-        postStudent(studentSecond);
+        createStudentDB(id, "Барсик",null);
+        createStudentDB(id + 1, "Ляля", List.of());
 
         Response response = topStudent();
 
@@ -197,11 +193,8 @@ public class RestTests {
     @Test
     public void getTopStudentReturnsStudentWithHighestAverageAndMostMarks() {
         // У кадого студента средняя оценка 5.0 и разное число оценок. Ляля топ, т к у нее больше оценок
-        StudentData student = new StudentData(id, "Барсик", List.of(5, 5));
-        StudentData topStudent = new StudentData(id + 1, "Ляля", List.of(5, 5, 5));
-
-        postStudent(student);
-        postStudent(topStudent);
+        StudentData student = createStudentDB(id, "Барсик", List.of(5, 5));
+        StudentData topStudent = createStudentDB(id + 1, "Ляля", List.of(5, 5, 5));
 
         List<StudentResponse> listStudents = getListTopStudents();
 
@@ -221,11 +214,8 @@ public class RestTests {
     @Test
     public void getTopStudentReturnsMultipleStudentsWhenEqualAverageAndMarksCount() {
         // Макс средняя оценка 5.0
-        StudentData studentFirst = new StudentData(id, "Барсик", List.of(5, 5));
-        StudentData studentSecond = new StudentData(id + 1, "Ляля", List.of(5, 5));
-
-        postStudent(studentFirst);
-        postStudent(studentSecond);
+        StudentData studentFirst = createStudentDB(id, "Барсик", List.of(5, 5));
+        StudentData studentSecond = createStudentDB(id + 1, "Ляля", List.of(5, 5));
 
         List<StudentResponse> listStudents = getListTopStudents();
 
