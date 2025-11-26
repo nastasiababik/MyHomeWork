@@ -1,5 +1,9 @@
-package com.example;
+package com.example.tests;
 
+import com.example.GradeCheckerServiceMock;
+import com.example.StudentMock;
+import com.example.StudentRepo;
+import com.example.StudentRepositoryMock;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
