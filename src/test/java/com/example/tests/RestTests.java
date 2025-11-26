@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.example.utils.StudentRestTestHelper.*;
 import static com.example.requests.StudentApi.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,49 +44,25 @@ public class RestTests {
     }
 
     //Мб вынести методы в другой класс?
-    /*
-    Метод для сравнения содержимого объекта student и json из payload ответа
-     */
-    private void assertStudentDataEquals(StudentData student, StudentResponse payload){
-        assertEquals(student.getId(), payload.getId());
-        assertEquals(student.getName(), payload.getName());
-        assertEquals(student.getMarks(), payload.getMarks());
-    }
 
-    /*
-    Метод, который извлекает payload из переданного типа респонса и сравнивает его с созданным студентом.
-    Название пока не придумала
-    */
-    private void myTestMethod(Response response, StudentData student){
-        StudentResponse payload = response.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
-        assertStudentDataEquals(student, payload);
-    }
 
-    private List<StudentResponse> getListTopStudents() {
-        Response response = StudentApi.topStudent();
-        assertEquals(200, response.getStatusCode());
-        return response.body()
-                .jsonPath()
-                .getList(".", StudentResponse.class);
-    }
 
     @DisplayName("1. GET /student/{id} для существующего в базе студента: возвращает код 200, JSON студента с ID и именем")
     @Test
     public void getStudentShouldReturn200(){
         //Создать студента с id и добавить через POST в базу
-        StudentData student = new StudentData(id,"Барсик", List.of(2, 3, 4));
-        postStudent(student);
+        StudentData student = createStudentDB(id,"Барсик", List.of(2, 3, 4));
 
         Response getResponse = StudentApi.getStudentById(id);
 
         assertEquals(ContentType.JSON.toString(), getResponse.getHeader("Content-Type"));
         assertEquals(200, getResponse.getStatusCode());
 
-        myTestMethod(getResponse, student);
+        assertResponseMatchesStudent(getResponse, student);
         /*
-        StudentResponse payload = getResponse.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
+        myTestMethod скрыл:
+        StudentResponse payload = getResponseAfterCreate.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
         assertStudentDataEquals(student, payload);
-
          */
     }
 
@@ -113,14 +90,37 @@ public class RestTests {
         assertEquals(201, postResponse.getStatusCode());
 
         Response getResponseAfterCreate = StudentApi.getStudentById(id);
-        myTestMethod(getResponseAfterCreate, student);
-        /*
-        StudentResponse payload = getResponseAfterCreate.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
-        assertStudentDataEquals(student, payload);
-         */
+        assertResponseMatchesStudent(getResponseAfterCreate, student);
 
     }
-    //4. post /student обновляет студента в базе, если студент с таким ID ранее был, при этом имя заполнено, код 201.
+
+    @DisplayName("4. POST /student обновляет студента в базе, если студент с таким ID ранее был, при этом имя заполнено, код 201")
+    @Test
+    public void updateExistingStudentShouldReturn201() {
+        StudentData firstStudent = createStudentDB(id, "Барсик", List.of(2, 3));
+
+        Response getResponse = getStudentById(id);
+        assertEquals(200, getResponse.getStatusCode());
+
+        assertResponseMatchesStudent(getResponse, firstStudent);
+
+        // Обновляю студента
+        StudentData updStudent = new StudentData(id, "Ляля", List.of(5, 5, 4));
+        Response updResponse = postStudent(updStudent);
+        assertEquals(201, updResponse.getStatusCode());
+
+        Response updatedGetResponse = getStudentById(id);
+        assertEquals(200, updatedGetResponse.getStatusCode());
+
+        StudentResponse updatedPayload = updatedGetResponse.body()
+                .as(StudentResponse.class, ObjectMapperType.JACKSON_2);
+
+        // Проверяю все поля
+        assertResponseMatchesStudent(updatedGetResponse, updStudent);
+
+        assertEquals(id, updatedPayload.getId());
+    }
+
 
     @DisplayName("5. POST /student добавляет студента в базу: если ID равен null, сервер назначает ID, код 201")
     @Test
@@ -188,7 +188,7 @@ public class RestTests {
     @DisplayName("9. GET /topStudent: код 200 и пустое тело, если студентов нет в базе")
     @Test
     public void getTopStudentWhenNoStudents() {
-        Response response = topStudent(); // null — т.к. тело не требуется
+        Response response = topStudent();
 
         assertEquals(200, response.getStatusCode());
 
@@ -218,8 +218,8 @@ public class RestTests {
     @Test
     public void getTopStudentReturnsStudentWithHighestAverageAndMostMarks() {
         // У кадого студента средняя оценка 5.0 и разное число оценок. Ляля топ, т к у нее больше оценок
-        StudentData student = new StudentData(id, "Барсик", List.of(5, 5));           // 2 оценки
-        StudentData topStudent = new StudentData(id + 1, "Ляля", List.of(5, 5, 5));  // 3 оценки
+        StudentData student = new StudentData(id, "Барсик", List.of(5, 5));
+        StudentData topStudent = new StudentData(id + 1, "Ляля", List.of(5, 5, 5));
 
         postStudent(student);
         postStudent(topStudent);
@@ -248,12 +248,7 @@ public class RestTests {
         postStudent(studentFirst);
         postStudent(studentSecond);
 
-        Response response = StudentApi.topStudent();
-        assertEquals(200, response.getStatusCode());
-
-        List<StudentResponse> listStudents = response.body()
-                .jsonPath()
-                .getList(".", StudentResponse.class);
+        List<StudentResponse> listStudents = getListTopStudents();
 
         assertThat(listStudents)
                 .hasSize(2)
@@ -262,8 +257,5 @@ public class RestTests {
                         StudentResponse.of(studentSecond.getId(), "Ляля", List.of(5, 5))
                 );
     }
-
-
-
 
 }
