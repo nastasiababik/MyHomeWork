@@ -36,11 +36,25 @@ public class StudentRestTestHelper {
 
         return student;
     }
+
     /**
-     Метод для сравнения содержимого объекта student и json из payload ответа
+     * Метод сравниваем имя и оценки студента с данными, которые вернул метод StudentApi
+     * @param student эталонные данные студента
+     *  @param payload payload для сравнения
      */
     public static void assertStudentDataEquals(StudentData student, StudentResponse payload){
         assertEquals(student.getId(), payload.getId());
+        assertEquals(student.getName(), payload.getName());
+        assertEquals(student.getMarks(), payload.getMarks());
+    }
+
+    /**
+     * Метод сравниваем имя и оценки студента с данными, которые вернул метод StudentApi
+     * @param student эталонные данные студента
+     * @param response запрос, из которого извлекается payload для сравнения
+     */
+    public static void assertNameAndMarksMatch(StudentData student, Response response){
+        StudentResponse payload = response.body().as(StudentResponse.class, ObjectMapperType.JACKSON_2);
         assertEquals(student.getName(), payload.getName());
         assertEquals(student.getMarks(), payload.getMarks());
     }

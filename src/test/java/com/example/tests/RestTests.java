@@ -4,7 +4,6 @@ import com.example.model.StudentData;
 import com.example.model.StudentResponse;
 import com.example.requests.StudentApi;
 import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 
 import org.junit.jupiter.api.*;
@@ -98,27 +97,14 @@ public class RestTests {
     @Test
     public void updateExistingStudentShouldReturn201() {
         StudentData firstStudent = createStudentDB(id, "Барсик", List.of(2, 3));
+        assertResponseMatchesStudent(getStudentById(id), firstStudent);
 
-        Response getResponse = getStudentById(id);
-        assertEquals(200, getResponse.getStatusCode());
-
-        assertResponseMatchesStudent(getResponse, firstStudent);
-
-        // Обновляю студента
+        // Обновляю студента с тем же самым id
         StudentData updStudent = new StudentData(id, "Ляля", List.of(5, 5, 4));
         Response updResponse = postStudent(updStudent);
         assertEquals(201, updResponse.getStatusCode());
 
-        Response updatedGetResponse = getStudentById(id);
-        assertEquals(200, updatedGetResponse.getStatusCode());
-
-        StudentResponse updatedPayload = updatedGetResponse.body()
-                .as(StudentResponse.class, ObjectMapperType.JACKSON_2);
-
-        // Проверяю все поля
-        assertResponseMatchesStudent(updatedGetResponse, updStudent);
-
-        assertEquals(id, updatedPayload.getId());
+        assertResponseMatchesStudent(getStudentById(id), updStudent);
     }
 
 
@@ -126,25 +112,18 @@ public class RestTests {
     @Test
     public void createStudentWithNullIdShouldReturn201() {
         StudentData student = new StudentData(null, "Вика", List.of(4, 3));
+
         Response postResponse = postStudent(student);
         assertEquals(201, postResponse.getStatusCode());
 
-        int returnId = postResponse.getBody()
-                .jsonPath()
-                .getInt(""); //POST возвращает просто число пример:99658
-
-        idTest5 = returnId; //Сохраняю сгенеренный в тесте id, чтоб потом его удалить
+        int returnId = postResponse.body().jsonPath().getInt(""); //POST возвращает просто число пример:99658
+        idTest5 = returnId; //Сохраняю сгенеренный в тесте id для @AfterEach
+        assertTrue(returnId > 0);
 
         Response getResponse = StudentApi.getStudentById(returnId);
         assertEquals(200, getResponse.getStatusCode());
+        assertNameAndMarksMatch(student, getResponse);
 
-        assertEquals(student.getName(), getResponse.getBody()
-                        .jsonPath()
-                        .getString("name"));
-
-        assertEquals(student.getMarks(), getResponse.getBody()
-                .jsonPath()
-                .getList("marks"));
     }
 
     @DisplayName("6. POST /student студент без имени: вовзращает код 400")
