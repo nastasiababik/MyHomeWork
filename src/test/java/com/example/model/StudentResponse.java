@@ -15,6 +15,14 @@ public class StudentResponse {
     @JsonProperty
     private List<Integer> marks;
 
+    public static StudentResponse of(Integer id, String name, List<Integer> marks) {
+        StudentResponse response = new StudentResponse();
+        response.id = id;
+        response.name = name;
+        response.marks = marks;
+        return response;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

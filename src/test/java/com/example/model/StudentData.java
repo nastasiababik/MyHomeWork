@@ -12,11 +12,14 @@ import java.util.Objects;
 public class StudentData {
     @JsonProperty
     private Integer id; // id может быть null
+
     @JsonProperty
     private String name; // Обязательное поле
+
     @JsonProperty
     private List<Integer> marks; //может быть пустым, содержать числа или быть null.
 
+    //Конструкторы
     public StudentData() {};
 
     public StudentData(String name) {
@@ -35,14 +38,10 @@ public class StudentData {
     }
 
     public List<Integer> getMarks() {
-        return Collections.unmodifiableList(marks);
-
-        // Возвращаем неизменяемый список или null
-        /*
-        return (marks != null)
-                ? Collections.unmodifiableList(marks)
-                : null;
-         */
+            if (marks == null) {
+                return null;
+            }
+            return Collections.unmodifiableList(marks);
     }
 
     public void addMark(int mark) {

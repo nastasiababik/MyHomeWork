@@ -34,10 +34,9 @@ public class StudentApi {
                 .delete(BASE_URL + EndpointPath.STUDENT.getPath() + "/" +id);
     }
 
-    public static Response topStudent(StudentData student){
+    public static Response topStudent(){
         return given()
                 .contentType(ContentType.JSON)
-                .body(student)
                 .when()
                 .get(BASE_URL + TOP_STUDENT.getPath());
     }

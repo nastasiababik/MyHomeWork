@@ -11,10 +11,11 @@ import org.junit.jupiter.api.*;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.example.requests.StudentApi.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RestTests {
     private int id;
@@ -38,23 +39,37 @@ public class RestTests {
         assertStudentDataEquals(student, payload);
     }
 
+    private List<StudentResponse> getListTopStudents() {
+        Response response = StudentApi.topStudent();
+        assertEquals(200, response.getStatusCode());
+        return response.body()
+                .jsonPath()
+                .getList(".", StudentResponse.class);
+    }
+
     @BeforeEach
     void setUp() {
         // Генерирует уникальный id перед каждым тестом
         id = new Random().nextInt(100000);
-        NON_EXISTING_ID = id +1;
+        NON_EXISTING_ID = id + ThreadLocalRandom.current().nextInt(2, 11);
 
-        // Если пользователь с id есть в базе, то удаляем его, чтобы тесты не падали
+        // Если пользователь с id есть в базе, то удаляем его, чтобы не влиять на другие тесты
+        /*
         Response response = StudentApi.getStudentById(id);
         if (response.getStatusCode() == 200) {
             deleteStudent(id);
         }
+
+         */
+        deleteStudent(id);
+        deleteStudent(id + 1);
     }
 
     @AfterEach
     void cleanup() {
         // На всякий случай удалить после теста студента
         deleteStudent(id);
+        deleteStudent(id + 1);
     }
 
     @DisplayName("1. GET /student/{id} для существующего в базе студента: возвращает код 200, JSON студента с ID и именем")
@@ -62,7 +77,7 @@ public class RestTests {
     public void getStudentShouldReturn200(){
         //Создать студента с id и добавить через POST в базу
         StudentData student = new StudentData(id,"Барсик", List.of(2, 3, 4));
-        Response createResponse = postStudent(student);
+        postStudent(student);
 
         Response getResponse = StudentApi.getStudentById(id);
 
@@ -89,13 +104,14 @@ public class RestTests {
 
     }
 
-    @DisplayName("4. POST /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201")
+    @DisplayName("3. POST /student добавляет студента в базу, если студента с таким ID ранее не было, при этом имя заполнено, код 201")
     @Test
     public void createStudentShouldReturn201(){
         StudentData student = new StudentData(id, "Лера", List.of(4, 3));
 
         Response getResponseBeforeCreate = StudentApi.getStudentById(id);
         assertEquals(404, getResponseBeforeCreate.getStatusCode());
+
         Response postResponse = postStudent(student);
         assertEquals(201, postResponse.getStatusCode());
 
@@ -107,6 +123,7 @@ public class RestTests {
          */
 
     }
+    //4. post /student обновляет студента в базе, если студент с таким ID ранее был, при этом имя заполнено, код 201.
 
     @DisplayName("5. POST /student добавляет студента в базу: если ID равен null, сервер назначает ID, код 201")
     @Test
@@ -115,12 +132,20 @@ public class RestTests {
         Response postResponse = postStudent(student);
         assertEquals(201, postResponse.getStatusCode());
 
-        int returnId = postResponse.getBody().jsonPath().getInt(""); //POST возвращает просто число 99658
+        int returnId = postResponse.getBody()
+                .jsonPath()
+                .getInt(""); //POST возвращает просто число 99658
 
         Response getResponse = StudentApi.getStudentById(returnId);
         assertEquals(200, getResponse.getStatusCode());
-        assertEquals(student.getName(), getResponse.getBody().jsonPath().getString("name"));
-        assertEquals(student.getMarks(), getResponse.getBody().jsonPath().getList("marks"));
+
+        assertEquals(student.getName(), getResponse.getBody()
+                        .jsonPath()
+                        .getString("name"));
+
+        assertEquals(student.getMarks(), getResponse.getBody()
+                .jsonPath()
+                .getList("marks"));
     }
 
     @DisplayName("6. POST /student студент без имени: вовзращает код 400")
@@ -128,6 +153,7 @@ public class RestTests {
     public void createStudentShouldReturn400(){
         StudentData nonameStudent = new StudentData(id, null, List.of(2,5));
         Response response = postStudent(nonameStudent);
+
         assertEquals(400, response.getStatusCode());
     }
 
@@ -135,7 +161,7 @@ public class RestTests {
     @Test
     public void deleteStudentShouldReturn200(){
         StudentData student = new StudentData(id,"Вася", List.of(5));
-        Response createStudentResponse = postStudent(student);
+        postStudent(student);
 
         Response deleteResponse = deleteStudent(student.getId());
         /* Закомментированная проверка, т.к. в RestApp.jar не реализован Content-Type для ответа 404
@@ -144,7 +170,7 @@ public class RestTests {
         assertEquals(200, deleteResponse.getStatusCode());
 
         //В конце теста проверить, что студент удален попытаться вернуть его по id
-        Response getResponse = StudentApi.getStudentById(id);
+        Response getResponse = getStudentById(id);
         assertEquals(404, getResponse.getStatusCode());
     }
 
@@ -160,10 +186,85 @@ public class RestTests {
 
     }
 
+    @DisplayName("9. GET /topStudent: код 200 и пустое тело, если студентов нет в базе")
+    @Test
+    public void getTopStudentWhenNoStudents() {
+        Response response = topStudent(); // null — т.к. тело не требуется
+
+        assertEquals(200, response.getStatusCode());
+
+        String body = response.body().asString();
+        assertTrue(body.isEmpty());
+    }
+
+    @DisplayName("10. GET /topStudent: код 200 и пустое тело, если ни у одного студента нет оценок")
+    @Test
+    public void getTopStudentWhenNoStudentHasMarks() {
+        StudentData studentFirst = new StudentData(id, "Барсик",null);
+        StudentData studentSecond = new StudentData(id + 1, "Ляля", List.of());
+
+        postStudent(studentFirst);
+        postStudent(studentSecond);
+
+        Response response = topStudent();
+
+        assertEquals(200, response.getStatusCode());
+
+        String body = response.body().asString();
+        assertTrue(body.isEmpty());
+    }
+
+    @DisplayName("11. GET /topStudent: и один студент, если у него максимальная средняя оценка, " +
+            "либо же среди всех студентов с максимальной средней у него их больше всего.")
+    @Test
+    public void getTopStudentReturnsStudentWithHighestAverageAndMostMarks() {
+        // У кадого студента средняя оценка 5.0 и разное число оценок. Ляля топ, т к у нее больше оценок
+        StudentData student = new StudentData(id, "Барсик", List.of(5, 5));           // 2 оценки
+        StudentData topStudent = new StudentData(id + 1, "Ляля", List.of(5, 5, 5));  // 3 оценки
+
+        postStudent(student);
+        postStudent(topStudent);
+
+        List<StudentResponse> listStudents = getListTopStudents();
+
+        assertThat(listStudents)
+                .hasSize(1)
+                .containsExactly(
+                        StudentResponse.of(
+                                topStudent.getId(),
+                                "Ляля",
+                                List.of(5, 5, 5)
+                        )
+                );
+    }
+
+    @DisplayName("12. GET /topStudent: код 200 и несколько студентов, если у всех максимальная средняя оценка " +
+            "и одинаковое количество оценок")
+    @Test
+    public void getTopStudentReturnsMultipleStudentsWhenEqualAverageAndMarksCount() {
+        // Макс средняя оценка 5.0
+        StudentData studentFirst = new StudentData(id, "Барсик", List.of(5, 5));
+        StudentData studentSecond = new StudentData(id + 1, "Ляля", List.of(5, 5));
+
+        postStudent(studentFirst);
+        postStudent(studentSecond);
+
+        Response response = StudentApi.topStudent();
+        assertEquals(200, response.getStatusCode());
+
+        List<StudentResponse> listStudents = response.body()
+                .jsonPath()
+                .getList(".", StudentResponse.class);
+
+        assertThat(listStudents)
+                .hasSize(2)
+                .containsExactlyInAnyOrder(
+                        StudentResponse.of(studentFirst.getId(), "Барсик", List.of(5, 5)),
+                        StudentResponse.of(studentSecond.getId(), "Ляля", List.of(5, 5))
+                );
+    }
 
 
-
-    //get /topStudent ...
 
 
 }
