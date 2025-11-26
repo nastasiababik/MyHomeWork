@@ -20,7 +20,29 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestTests {
     private int id;
     private int NON_EXISTING_ID;
+    private Integer idTest5;
 
+    @BeforeEach
+    void setUp() {
+        // Генерирует уникальный id перед каждым тестом
+        id = new Random().nextInt(100000);
+        NON_EXISTING_ID = id + ThreadLocalRandom.current().nextInt(2, 11);
+        idTest5 = null;
+
+    }
+
+    @AfterEach
+    void cleanup() {
+        // Чищу базу студентво после тестов
+        deleteStudent(id);
+        deleteStudent(id + 1);
+        if (idTest5 != null) {
+            deleteStudent(idTest5);
+            idTest5 = null;
+        }
+    }
+
+    //Мб вынести методы в другой класс?
     /*
     Метод для сравнения содержимого объекта student и json из payload ответа
      */
@@ -45,31 +67,6 @@ public class RestTests {
         return response.body()
                 .jsonPath()
                 .getList(".", StudentResponse.class);
-    }
-
-    @BeforeEach
-    void setUp() {
-        // Генерирует уникальный id перед каждым тестом
-        id = new Random().nextInt(100000);
-        NON_EXISTING_ID = id + ThreadLocalRandom.current().nextInt(2, 11);
-
-        // Если пользователь с id есть в базе, то удаляем его, чтобы не влиять на другие тесты
-        /*
-        Response response = StudentApi.getStudentById(id);
-        if (response.getStatusCode() == 200) {
-            deleteStudent(id);
-        }
-
-         */
-        deleteStudent(id);
-        deleteStudent(id + 1);
-    }
-
-    @AfterEach
-    void cleanup() {
-        // На всякий случай удалить после теста студента
-        deleteStudent(id);
-        deleteStudent(id + 1);
     }
 
     @DisplayName("1. GET /student/{id} для существующего в базе студента: возвращает код 200, JSON студента с ID и именем")
@@ -134,7 +131,9 @@ public class RestTests {
 
         int returnId = postResponse.getBody()
                 .jsonPath()
-                .getInt(""); //POST возвращает просто число 99658
+                .getInt(""); //POST возвращает просто число пример:99658
+
+        idTest5 = returnId; //Сохраняю сгенеренный в тесте id, чтоб потом его удалить
 
         Response getResponse = StudentApi.getStudentById(returnId);
         assertEquals(200, getResponse.getStatusCode());
