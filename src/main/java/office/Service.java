@@ -84,11 +84,11 @@ public class Service {
             stm.setString(1, departmentName);
             ResultSet rs = stm.executeQuery();
             if (rs.next()) {
-                int employeeCount = rs.getInt(1);
-                System.out.println(employeeCount);
+                int employeeCount = rs.getInt("EmployeeCount");
+                if(employeeCount >0) System.out.println(employeeCount);
+                else System.out.println("В отделе нет сотрудников");
             } else  {
-                System.out.println("В указанном отделе нет сотрудников или" +
-                        "отдел не сущестуует");
+                System.out.println("Отдел не сущестуует");
             }
 
         } catch (SQLException e) {
