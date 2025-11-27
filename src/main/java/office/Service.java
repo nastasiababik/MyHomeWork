@@ -85,8 +85,7 @@ public class Service {
             ResultSet rs = stm.executeQuery();
             if (rs.next()) {
                 int employeeCount = rs.getInt("EmployeeCount");
-                if(employeeCount >0) System.out.println(employeeCount);
-                else System.out.println("В отделе нет сотрудников");
+                System.out.println(employeeCount > 0 ? employeeCount : "\"В отделе нет сотрудников\"");
             } else  {
                 System.out.println("Отдел не сущестуует");
             }
