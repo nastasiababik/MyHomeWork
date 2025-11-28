@@ -112,6 +112,14 @@ public enum Option {
             }
         }   
     },
+    FIX_EMPLOYEE_NAME_CASE {
+        String getText() {return this.ordinal() + ".Заменить первую букву имени сотрудника на заглавную и" +
+                "вывести количество исправленных имен";}
+        void action() {
+            int fixedNames = Service.fixAndCountEmployeeName();
+            System.out.println("Исправлено имен:" +  fixedNames);
+        }
+    },
     PRINT_EMPLOYEES_COUNT_BY_DEPARTMENT {
         String getText() {return this.ordinal() + ".Вывести на экран количество сотрудников указанного отдела";}
 

@@ -71,6 +71,34 @@ public class Service {
         }
     }
 
+    // 2. Метод исправляет на заглавную первую букву имени и возвращает количество исправленных имен
+    public static int fixAndCountEmployeeName() {
+        int count = 0;
+
+        try(Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
+            Statement stm = con.createStatement();
+            ResultSet empList = stm.executeQuery("SELECT ID, Name FROM Employee");
+            while(empList.next()) {
+                int id = empList.getInt("ID");
+                String name = empList.getString("Name");
+                if(Character.isLowerCase(name.charAt(0))) {
+                    String fixName = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                    PreparedStatement updStm = con.prepareStatement("UPDATE Employee SET Name = ? WHERE ID = ?");
+                    updStm.setString(1, fixName);
+                    updStm.setInt(2, id);
+                    updStm.executeUpdate();
+
+                    count++;
+                }
+            }
+
+        } catch (Exception e){
+            System.out.println(e);
+        }
+
+        return count;
+    }
+
     //3. Вывод на экран количества сторудников отдела по названию отдела
     public static void countEmployeeDepartment(String departmentName) {
         try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")){
