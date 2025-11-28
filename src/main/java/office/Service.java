@@ -1,6 +1,8 @@
 package office;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Service {
 
@@ -71,6 +73,43 @@ public class Service {
         }
     }
 
+    // 1. Метод ищет сотрудника по переданному имени и если он один переводит его в HR отдел
+    public static void moveToHRByName(String name){
+        try(Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")){
+            PreparedStatement stm = con.prepareStatement("SELECT ID FROM Employee WHERE Name = ?");
+            stm.setString(1,name);
+            ResultSet rs = stm.executeQuery();
+
+            List<Integer> ids = new ArrayList<>();
+            while(rs.next()){
+                ids.add(rs.getInt("ID"));
+            }
+
+            if (ids.isEmpty()) {
+                System.out.println("Не удалось найти сторудника с именем " + name);
+            } else if (ids.size() > 1) {
+                System.out.println("Найдено несколько сотрудников с именем " +name);
+            } else {
+                int emplId = ids.get(0);
+                PreparedStatement updStm = con.prepareStatement("UPDATE Employee SET DepartmentId = ? WHERE ID = ?");
+                updStm.setInt(1, 3);
+                updStm.setInt(2, emplId);
+
+                int updRows = updStm.executeUpdate();
+
+                if (updRows == 1) {
+                    System.out.println("Сотрудник переведён в HR");
+                } else {
+                    System.out.println("Произошла ошибка во время перевода сотрудника в HR");
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
     // 2. Метод исправляет на заглавную первую букву имени и возвращает количество исправленных имен
     public static int fixAndCountEmployeeName() {
         int count = 0;
@@ -113,7 +152,7 @@ public class Service {
             ResultSet rs = stm.executeQuery();
             if (rs.next()) {
                 int employeeCount = rs.getInt("EmployeeCount");
-                System.out.println(employeeCount > 0 ? employeeCount : "\"В отделе нет сотрудников\"");
+                System.out.println(employeeCount > 0 ? employeeCount : "В отделе нет сотрудников");
             } else  {
                 System.out.println("Отдел не сущестуует");
             }

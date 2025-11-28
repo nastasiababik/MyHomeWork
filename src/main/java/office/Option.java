@@ -112,6 +112,15 @@ public enum Option {
             }
         }   
     },
+    MOVE_TO_HR_BY_NAME {
+        String getText() {return this.ordinal() + ".Перевести сотрудника по имени в HR отдел";}
+
+        void action() {
+            System.out.println("Введите имя сотрудника для перевода:");
+            String name =sc.nextLine();
+            Service.moveToHRByName(name);
+        }
+    },
     FIX_EMPLOYEE_NAME_CASE {
         String getText() {return this.ordinal() + ".Заменить первую букву имени сотрудника на заглавную и" +
                 "вывести количество исправленных имен";}
