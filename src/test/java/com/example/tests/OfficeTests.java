@@ -10,6 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.utils.OfficeTestsHelper.getEmployeeIdsByDepartment;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OfficeTests {
@@ -41,12 +42,15 @@ public class OfficeTests {
                 ) {
 
             //Из selectEmployeByDepartmen сохранить id сотрудников до удаления отдела
+            /*
             List<Integer> employeeIds = new ArrayList<>();
             selectEmployeByDepartment.setInt(1, departmentId);
             ResultSet resultSelectEmployeByDepartment = selectEmployeByDepartment.executeQuery();
             while(resultSelectEmployeByDepartment.next()){
                 employeeIds.add(resultSelectEmployeByDepartment.getInt(1));
             }
+             */
+            List<Integer> employeeIds = getEmployeeIdsByDepartment(selectEmployeByDepartment,  departmentId);
 
             // Удалить отдел
             Service.removeDepartment(department);
@@ -80,8 +84,8 @@ public class OfficeTests {
             }
 
             //Сравнить списки между собой -- если id сотрудников из удаленного отдела перекочевали в новый отдел, то тест упадёт. А он упадёт :)
-            System.out.println(newDepthEmployeeIds);
-            System.out.println(lastEmployeeIds);
+            //    System.out.println("id сотрудников нового отдела: " + newDepthEmployeeIds);
+         //   System.out.println("id сотрудников из старого отдела: " + lastEmployeeIds);
             assertFalse(lastEmployeeIds.containsAll(newDepthEmployeeIds));
 
         }
