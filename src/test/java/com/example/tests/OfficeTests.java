@@ -42,14 +42,6 @@ public class OfficeTests {
                 ) {
 
             //Из selectEmployeByDepartmen сохранить id сотрудников до удаления отдела
-            /*
-            List<Integer> employeeIds = new ArrayList<>();
-            selectEmployeByDepartment.setInt(1, departmentId);
-            ResultSet resultSelectEmployeByDepartment = selectEmployeByDepartment.executeQuery();
-            while(resultSelectEmployeByDepartment.next()){
-                employeeIds.add(resultSelectEmployeByDepartment.getInt(1));
-            }
-             */
             List<Integer> employeeIds = getEmployeeIdsByDepartment(selectEmployeByDepartment,  departmentId);
 
             // Удалить отдел
