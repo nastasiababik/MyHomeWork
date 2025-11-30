@@ -42,7 +42,7 @@ public class OfficeTests {
                 ) {
 
             //Из selectEmployeByDepartmen сохранить id сотрудников до удаления отдела
-            List<Integer> employeeIds = getEmployeeIdsByDepartment(selectEmployeByDepartment,  departmentId);
+            List<Integer> employeeIdsBeforeRemovingDept = getEmployeeIdsByDepartment(selectEmployeByDepartment,  departmentId);
 
             // Удалить отдел
             Service.removeDepartment(department);
@@ -54,31 +54,15 @@ public class OfficeTests {
                 assertEquals(0, resultCountDepartmentById.getInt(1));
             }
 
-            // Проверить через verifyEmployees, что остались сотрудники из удаленного отдела
-            verifyEmployees.setInt(1, departmentId);
-            ResultSet resultVerifyEmployees = verifyEmployees.executeQuery();
-            List<Integer> lastEmployeeIds = new ArrayList<>();
-            while(resultVerifyEmployees.next()){
-                lastEmployeeIds.add(resultVerifyEmployees.getInt(1));
-            }
-            assertTrue(employeeIds.containsAll(lastEmployeeIds));
-
             //Добавить в таблицу новый отдел с id удаленного, но названием "QA"
-            Department newDepartment = new Department(departmentId, "QA");
-            Service.addDepartment(newDepartment);
+            Service.addDepartment(new Department(departmentId, "QA"));
 
             // Получить список id сотрудников, которые состоят в новом отделе
-            verifyEmployees.setInt(1, departmentId);
-            ResultSet resultEmployeesFromNewDepartment = verifyEmployees.executeQuery();
-            List<Integer> newDepthEmployeeIds = new ArrayList<>();
-            while (resultEmployeesFromNewDepartment.next()){
-                newDepthEmployeeIds.add(resultEmployeesFromNewDepartment.getInt(1));
-            }
+            List<Integer> newDeptEmployeeIds = getEmployeeIdsByDepartment(verifyEmployees, departmentId);
 
-            //Сравнить списки между собой -- если id сотрудников из удаленного отдела перекочевали в новый отдел, то тест упадёт. А он упадёт :)
-            //    System.out.println("id сотрудников нового отдела: " + newDepthEmployeeIds);
-         //   System.out.println("id сотрудников из старого отдела: " + lastEmployeeIds);
-            assertFalse(lastEmployeeIds.containsAll(newDepthEmployeeIds));
+            // Проверить содержание списка отдела
+            assertFalse(employeeIdsBeforeRemovingDept.containsAll(newDeptEmployeeIds)
+                    , "Данные сотрудников должны были удалиться, а они переехали в новый отдел");
 
         }
     }
