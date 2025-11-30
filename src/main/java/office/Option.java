@@ -1,6 +1,5 @@
 package office;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -135,7 +134,7 @@ public enum Option {
         void action() {
             System.out.println("Введите название отдела:");
             String department=sc.nextLine();
-            Service.countEmployeeDepartment(department);
+            Service.countEmployeeDepartmentByDepartmentName(department);
         }
     },
     EXIT {

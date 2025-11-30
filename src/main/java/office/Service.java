@@ -139,7 +139,7 @@ public class Service {
     }
 
     //3. Вывод на экран количества сторудников отдела по названию отдела
-    public static void countEmployeeDepartment(String departmentName) {
+    public static void countEmployeeDepartmentByDepartmentName(String departmentName) {
         try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")){
             PreparedStatement stm = con.prepareStatement("""
                                  SELECT COUNT(*) AS EmployeeCount 
