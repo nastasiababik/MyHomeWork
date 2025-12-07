@@ -57,12 +57,10 @@ public class OfficeTests {
             //Добавить в таблицу новый отдел с id удаленного, но названием "QA"
             Service.addDepartment(new Department(departmentId, "QA"));
 
-            // Получить список id сотрудников, которые состоят в новом отделе
-            List<Integer> newDeptEmployeeIds = getEmployeeIdsByDepartment(verifyEmployees, departmentId);
-
-            // Проверить содержание списка отдела
-            assertFalse(employeeIdsBeforeRemovingDept.containsAll(newDeptEmployeeIds)
-                    , "Данные сотрудников должны были удалиться, а они переехали в новый отдел");
+            //Проверить, что в таблице Employee не осталось сотрудников связанных с удаленным отделом
+            verifyEmployees.setInt(1, departmentId);
+            ResultSet resultVerifyEmployees = verifyEmployees.executeQuery();
+            assertFalse(resultVerifyEmployees.next(), "Данные сотрудников не удалились");
 
         }
     }

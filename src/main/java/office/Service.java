@@ -9,14 +9,16 @@ public class Service {
     public static void createDB() {
         try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
             Statement stm = con.createStatement();
+            stm.executeUpdate("DROP TABLE Employee IF EXISTS");
             stm.executeUpdate("DROP TABLE Department IF EXISTS");
+
             stm.executeUpdate("CREATE TABLE Department(ID INT PRIMARY KEY, NAME VARCHAR(255))");
             stm.executeUpdate("INSERT INTO Department VALUES(1,'Accounting')");
             stm.executeUpdate("INSERT INTO Department VALUES(2,'IT')");
             stm.executeUpdate("INSERT INTO Department VALUES(3,'HR')");
 
-            stm.executeUpdate("DROP TABLE Employee IF EXISTS");
-            stm.executeUpdate("CREATE TABLE Employee(ID INT PRIMARY KEY, NAME VARCHAR(255), DepartmentID INT)");
+            stm.executeUpdate("CREATE TABLE Employee(ID INT PRIMARY KEY, NAME VARCHAR(255), DepartmentID INT," +
+                    "FOREIGN KEY(DepartmentID) REFERENCES Department(ID) ON DELETE CASCADE)");
             stm.executeUpdate("INSERT INTO Employee VALUES(1,'Pete',1)");
             stm.executeUpdate("INSERT INTO Employee VALUES(2,'Ann',1)");
 
