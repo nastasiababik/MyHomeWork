@@ -4,7 +4,6 @@ import office.dao.DepartmentDAO;
 import office.dao.EmployeeDAO;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
@@ -39,60 +38,43 @@ public class Service {
         }
     }
 
-    public static void addDepartment(Department d) {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            PreparedStatement stm = con.prepareStatement("INSERT INTO Department VALUES(?,?)");
-            stm.setInt(1, d.departmentID);
-            stm.setString(2, d.getName());
-            stm.executeUpdate();
+    public void addDepartment(Department d) {
+        try {
+            departmentDAO.insert(d);
+
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
-    public static void removeDepartment(Department d) {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            PreparedStatement stm = con.prepareStatement("DELETE FROM Department WHERE ID=?");
-            stm.setInt(1, d.departmentID);
-            stm.executeUpdate();
+    public void removeDepartment(Department d) {
+        try {
+            departmentDAO.delete(d);
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
-    public static void addEmployee(Employee empl) {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            PreparedStatement stm = con.prepareStatement("INSERT INTO Employee VALUES(?,?,?)");
-            stm.setInt(1, empl.getEmployeeId());
-            stm.setString(2, empl.getName());
-            stm.setInt(3, empl.getDepartmentId());
-            stm.executeUpdate();
+    public void addEmployee(Employee empl) {
+        try {
+            employeeDAO.insert(empl);
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
-    public static void removeEmployee(Employee empl) {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            PreparedStatement stm = con.prepareStatement("DELETE FROM Employee WHERE ID=?");
-            stm.setInt(1, empl.getEmployeeId());
-            stm.executeUpdate();
+    public void removeEmployee(Employee empl) {
+        try {
+            employeeDAO.delete(empl);
         } catch (Exception e) {
             System.out.println(e);
         }
     }
 
     // 1. Метод ищет сотрудника по переданному имени и если он один переводит его в HR отдел
-    public static void moveToHRByName(String name){
-        try(Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")){
-            PreparedStatement stm = con.prepareStatement("SELECT ID FROM Employee WHERE Name = ?");
-            stm.setString(1,name);
-            ResultSet rs = stm.executeQuery();
-
-            List<Integer> ids = new ArrayList<>();
-            while(rs.next()){
-                ids.add(rs.getInt("ID"));
-            }
+    public void moveToHRByName(String name){
+        try{
+            List<Integer> ids = employeeDAO.getIdsByEmployeeName(name);
 
             if (ids.isEmpty()) {
                 System.out.println("Не удалось найти сторудника с именем " + name);
@@ -100,13 +82,9 @@ public class Service {
                 System.out.println("Найдено несколько сотрудников с именем " +name);
             } else {
                 int emplId = ids.get(0);
-                PreparedStatement updStm = con.prepareStatement("UPDATE Employee SET DepartmentId = ? WHERE ID = ?");
-                updStm.setInt(1, 3);
-                updStm.setInt(2, emplId);
+                employeeDAO.setDepartmentByEmployeeId(emplId, 3);
 
-                int updRows = updStm.executeUpdate();
-
-                if (updRows == 1) {
+                if (departmentDAO.getEmployeeCountByDepartmentName("HR") > 0) {
                     System.out.println("Сотрудник переведён в HR");
                 } else {
                     System.out.println("Произошла ошибка во время перевода сотрудника в HR");
@@ -120,21 +98,16 @@ public class Service {
     }
 
     // 2. Метод исправляет на заглавную первую букву имени и возвращает количество исправленных имен
-    public static int fixAndCountEmployeeName() {
+    public int fixAndCountEmployeeName() {
         int count = 0;
 
-        try(Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            Statement stm = con.createStatement();
-            ResultSet empList = stm.executeQuery("SELECT ID, Name FROM Employee");
-            while(empList.next()) {
-                int id = empList.getInt("ID");
-                String name = empList.getString("Name");
+        try {
+            for(Employee empList : employeeDAO.getAllEmployee()){
+                String name = empList.getName();
+
                 if(Character.isLowerCase(name.charAt(0))) {
                     String fixName = Character.toUpperCase(name.charAt(0)) + name.substring(1);
-                    PreparedStatement updStm = con.prepareStatement("UPDATE Employee SET Name = ? WHERE ID = ?");
-                    updStm.setString(1, fixName);
-                    updStm.setInt(2, id);
-                    updStm.executeUpdate();
+                    employeeDAO.updateEmployeeNameById(empList.getEmployeeId(), fixName);
 
                     count++;
                 }
@@ -148,22 +121,14 @@ public class Service {
     }
 
     //3. Вывод на экран количества сторудников отдела по названию отдела
-    public static void countEmployeeDepartmentByDepartmentName(String departmentName) {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")){
-            PreparedStatement stm = con.prepareStatement("""
-                                 SELECT COUNT(*) AS EmployeeCount 
-                                 FROM Employee 
-                                 JOIN Department ON Employee.DepartmentID = Department.ID 
-                                 WHERE Department.Name = ?
-                                 """
-            );
-            stm.setString(1, departmentName);
-            ResultSet rs = stm.executeQuery();
-            if (rs.next()) {
-                int employeeCount = rs.getInt("EmployeeCount");
-                System.out.println(employeeCount > 0 ? employeeCount : "В отделе нет сотрудников");
+    public void countEmployeeDepartmentByDepartmentName(String departmentName) {
+        try {
+            int employeeCount = departmentDAO.getEmployeeCountByDepartmentName(departmentName);
+
+            if (employeeCount > 0) {
+                System.out.println(employeeCount);
             } else  {
-                System.out.println("Отдел не сущестуует");
+                System.out.println("В отделе нет сотрудников");
             }
 
         } catch (SQLException e) {

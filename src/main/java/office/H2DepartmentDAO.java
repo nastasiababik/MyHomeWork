@@ -3,6 +3,8 @@ package office;
 import office.dao.DepartmentDAO;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class H2DepartmentDAO implements DepartmentDAO {
     private final H2DbConnector connector;
@@ -47,17 +49,33 @@ public class H2DepartmentDAO implements DepartmentDAO {
     }
 
     @Override
-    public int getEmployeeCountByDepartmentName(String name) throws SQLException {
+    public int getEmployeeCountByDepartmentName(String deptName) throws SQLException {
         try (Connection con = connector.getConnection();
              PreparedStatement stm = con.prepareStatement("SELECT COUNT(*) AS EmployeeCount  FROM Employee " +
                      "JOIN Department ON Employee.DepartmentID = Department.ID  WHERE Department.Name = ?")) {
-            stm.setString(1, name);
+            stm.setString(1, deptName);
             ResultSet rs = stm.executeQuery();
             if (rs.next()) {
                 return rs.getInt("EmployeeCount");
             }
         }
         return 0;
+    }
+
+    @Override
+    public List<Department> getAllDepartments() throws SQLException {
+        List<Department> departments = new ArrayList<>();
+
+        try (Connection con = connector.getConnection();
+             Statement stm = con.createStatement();
+             ResultSet rs = stm.executeQuery("SELECT ID, NAME FROM Department ORDER BY ID")) {
+
+            while (rs.next()) {
+                departments.add(new Department(rs.getInt("ID"),rs.getString("NAME")));
+            }
+        }
+
+        return departments;
     }
 
 }

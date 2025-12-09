@@ -3,6 +3,7 @@ package office.dao;
 import office.Department;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface DepartmentDAO {
     void createTable() throws SQLException;
@@ -15,4 +16,5 @@ public interface DepartmentDAO {
      */
     int getEmployeeCountByDepartmentName(String name) throws SQLException;
 
+    List<Department> getAllDepartments() throws SQLException;
 }

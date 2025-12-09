@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class H2EmployeeDAO implements EmployeeDAO {
-    private final H2DbConnector connector;
+    private final DbConnector connector;
 
     public H2EmployeeDAO(H2DbConnector con) {
         this.connector = con;
@@ -72,7 +72,7 @@ public class H2EmployeeDAO implements EmployeeDAO {
         List<Employee> employees = new ArrayList<>();
         try (Connection con = connector.getConnection();
              Statement stm = con.createStatement();
-             ResultSet rs = stm.executeQuery("SELECT ID, NAME, DepartmentID FROM Employee")) {
+             ResultSet rs = stm.executeQuery("SELECT ID, NAME, DepartmentID FROM Employee ORDER BY ID")) {
 
             while(rs.next()){
                 employees.add(new Employee(rs.getInt("ID"),rs.getString("NAME"),rs.getInt("DepartmentID")));
