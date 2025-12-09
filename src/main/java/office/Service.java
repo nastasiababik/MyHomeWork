@@ -1,31 +1,38 @@
 package office;
 
+import office.dao.DepartmentDAO;
+import office.dao.EmployeeDAO;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
+    private final DepartmentDAO departmentDAO;
+    private final EmployeeDAO employeeDAO;
 
-    public static void createDB() {
-        try (Connection con = DriverManager.getConnection("jdbc:h2:.\\Office")) {
-            Statement stm = con.createStatement();
-            stm.executeUpdate("DROP TABLE Employee IF EXISTS");
-            stm.executeUpdate("DROP TABLE Department IF EXISTS");
+    public Service(DepartmentDAO departmentDAO, EmployeeDAO employeeDAO) {
+        this.departmentDAO = departmentDAO;
+        this.employeeDAO = employeeDAO;
 
-            stm.executeUpdate("CREATE TABLE Department(ID INT PRIMARY KEY, NAME VARCHAR(255))");
-            stm.executeUpdate("INSERT INTO Department VALUES(1,'Accounting')");
-            stm.executeUpdate("INSERT INTO Department VALUES(2,'IT')");
-            stm.executeUpdate("INSERT INTO Department VALUES(3,'HR')");
+    }
 
-            stm.executeUpdate("CREATE TABLE Employee(ID INT PRIMARY KEY, NAME VARCHAR(255), DepartmentID INT," +
-                    "FOREIGN KEY(DepartmentID) REFERENCES Department(ID) ON DELETE CASCADE)");
-            stm.executeUpdate("INSERT INTO Employee VALUES(1,'Pete',1)");
-            stm.executeUpdate("INSERT INTO Employee VALUES(2,'Ann',1)");
+    public void createDB() {
+        try {
+            employeeDAO.dropTable();
+            departmentDAO.dropTable();
 
-            stm.executeUpdate("INSERT INTO Employee VALUES(3,'Liz',2)");
-            stm.executeUpdate("INSERT INTO Employee VALUES(4,'Tom',2)");
+            departmentDAO.createTable();
+            departmentDAO.insert(new Department(1,"Accounting"));
+            departmentDAO.insert(new Department(2,"IT"));
+            departmentDAO.insert(new Department(3,"HR"));
 
-            stm.executeUpdate("INSERT INTO Employee VALUES(5,'Todd',3)");
+            employeeDAO.createTable();
+            employeeDAO.insert(new Employee(1, "Pete", 1));
+            employeeDAO.insert(new Employee(2, "Ann", 1));
+            employeeDAO.insert(new Employee(3, "Liz", 2));
+            employeeDAO.insert(new Employee(4, "Tom", 2));
+            employeeDAO.insert(new Employee(5, "Todd", 3));
 
         } catch (SQLException e) {
             System.out.println(e);

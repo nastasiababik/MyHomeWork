@@ -25,8 +25,9 @@ public class OfficeTests {
 
     @AfterEach
     void tearDown() throws SQLException {
-        if (con != null){}
+        if (con != null){
             con.close();
+        }
     }
 
     @Test
