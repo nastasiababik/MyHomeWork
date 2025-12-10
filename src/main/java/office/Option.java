@@ -1,9 +1,13 @@
 package office;
 
+import office.dao.DepartmentDAO;
+import office.dao.EmployeeDAO;
+
 import java.sql.*;
 import java.util.Scanner;
 
 public enum Option {
+
     AddEmployee {
         String getText() {
             return this.ordinal() + ".Добавить сотрудника";
@@ -16,7 +20,7 @@ public enum Option {
             String name=sc.next();
             System.out.println("Введите id отдела:");
             int depid=sc.nextInt();
-            Service.addEmployee(new Employee(id,name,depid));
+            service.addEmployee(new Employee(id,name,depid));
         }
     },
     DeleteEmployee {
@@ -27,7 +31,7 @@ public enum Option {
         void action() {
             System.out.println("Введите его id:");
             int id=sc.nextInt();
-            Service.removeEmployee(new Employee(id,"",0));
+            service.removeEmployee(new Employee(id,"",0));
         }
     },
     AddDepartment {
@@ -40,7 +44,7 @@ public enum Option {
             int id=sc.nextInt();
             System.out.println("Введите его название:");
             String name=sc.next();
-            Service.addDepartment(new Department(id,name));
+            service.addDepartment(new Department(id,name));
         }
     },
     DeleteDepartment {
@@ -51,7 +55,7 @@ public enum Option {
         void action() {
             System.out.println("Введите его id:");
             int id=sc.nextInt();
-            Service.removeDepartment(new Department(id,""));
+            service.removeDepartment(new Department(id,""));
         }
     },
     CLEAR_DB {
@@ -60,7 +64,7 @@ public enum Option {
         }
 
         void action() {
-            Service.createDB();
+            service.createDB();
         }
 
     },
@@ -117,14 +121,14 @@ public enum Option {
         void action() {
             System.out.println("Введите имя сотрудника для перевода:");
             String name =sc.nextLine();
-            Service.moveToHRByName(name);
+            service.moveToHRByName(name);
         }
     },
     FIX_EMPLOYEE_NAME_CASE {
         String getText() {return this.ordinal() + ".Заменить первую букву имени сотрудника на заглавную и" +
                 "вывести количество исправленных имен";}
         void action() {
-            int fixedNames = Service.fixAndCountEmployeeName();
+            int fixedNames = service.fixAndCountEmployeeName();
             System.out.println("Исправлено имен:" +  fixedNames);
         }
     },
@@ -134,7 +138,7 @@ public enum Option {
         void action() {
             System.out.println("Введите название отдела:");
             String department=sc.nextLine();
-            Service.countEmployeeDepartmentByDepartmentName(department);
+            service.countEmployeeDepartmentByDepartmentName(department);
         }
     },
     EXIT {
@@ -146,7 +150,21 @@ public enum Option {
             System.out.println("выход");
         }
     },;
-    
+
+    private static final Service service;
+
+    static {
+        try {
+            H2DbConnector connector = new H2DbConnector("jdbc:h2:.\\\\Office");
+
+            DepartmentDAO departmentDAO = new H2DepartmentDAO(connector);
+            EmployeeDAO employeeDAO = new H2EmployeeDAO(connector);
+            service = new Service(departmentDAO, employeeDAO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     Scanner sc = new Scanner(System.in);
     abstract String getText();
     abstract void action();
