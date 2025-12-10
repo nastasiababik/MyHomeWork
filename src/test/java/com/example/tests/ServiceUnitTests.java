@@ -2,6 +2,7 @@ package com.example.tests;
 
 import com.example.utils.ServiceTestHelper;
 import office.Department;
+import office.Employee;
 import office.Service;
 import office.dao.DepartmentDAO;
 import office.dao.EmployeeDAO;
@@ -17,6 +18,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +42,8 @@ public class ServiceUnitTests {
     @DisplayName("После удаления отдела его нет в таблице Departments")
     @Test
     void testCheckDepartmentsListAfterRemovingDepartment() throws SQLException {
+        System.setProperty("mockito.plugin.MockMaker", "mock-maker-default");
+
         Department department1 = new Department(1, "AccountingTest");
         Department department2 = new Department(2, "QATest");
 
@@ -56,7 +61,24 @@ public class ServiceUnitTests {
         assertFalse(allDepartments.contains(department1), "Удаленный отдел остался в таблице");
     }
 
-//    @DisplayName("После удаления отдела его нет в таблице Departments")
+    @DisplayName("Удаление отдела стриает данные связанных сотрудников")
+    @Test
+    void testDeletesEmployeesFromSameDepartment() throws SQLException {
+        Department department1 = new Department(1, "AccountingTest");
+        Department department2 = new Department(2, "QATest");
+        Employee empl1 = new Employee(1, "Barsik", 1);
+        Employee empl2 = new Employee(2, "Krosh", 2);
+
+        Mockito.when(employeeDAOMock.getAllEmployee()).thenReturn(List.of(empl1, empl2));
+
+        service.removeDepartment(department1);
+
+        Mockito.verify(employeeDAOMock).delete(empl1);
+        assertFalse(employeeDAOMock.getAllEmployee().contains(empl1));
+        assertTrue(employeeDAOMock.getAllEmployee().contains(empl2));
+
+
+    }
 
 
 }
