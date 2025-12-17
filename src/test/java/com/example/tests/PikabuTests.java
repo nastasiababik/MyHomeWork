@@ -4,9 +4,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+
+import java.util.Collections;
 
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,9 +29,19 @@ public class PikabuTests {
     @BeforeEach
     public void setUp()
     {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36");
+        options.addArguments("--lang=ru-RU");
+        options.addArguments("--window-size=1920,1080");
+
+        options.addArguments("--incognito");
 
         System.setProperty("webdriver.chrome.driver", "C:\\Users\\ababik\\Downloads\\chromedriver-win64/chromedriver.exe");
-        driver = new ChromeDriver();
+        driver = new ChromeDriver(options);
+
+        ((JavascriptExecutor) driver).executeScript(
+                "Object.defineProperty(navigator, 'webdriver', {get: () => false});");
+
 
         driver.get("https://pikabu.ru");
     }
@@ -45,7 +59,7 @@ public class PikabuTests {
         validatePageTitle();
         clickButton(MENU_LOGIN_BUTTON);
         verifyAuthModalElements();
-        login("nastya@yandex.ru", "AB@test@3661");
+        login("bars2000@gmail.ru", "20@tbars11");
         sleep(2000);
         validateErrorMessage(); //Проверка падает т к сообщение об ошибке не видно, его перекрывает капча
     }
@@ -66,6 +80,7 @@ public class PikabuTests {
     }
 
     private void login(String username, String password) throws InterruptedException {
+        sleep(2000);
         driver.findElement(LOGIN_INPUT).sendKeys(username);
         sleep(4000);
         driver.findElement(PASSWORD_INPUT).sendKeys(password);
