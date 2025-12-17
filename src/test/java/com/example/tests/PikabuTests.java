@@ -38,6 +38,7 @@ public class PikabuTests {
 
         System.setProperty("webdriver.chrome.driver", "C:\\Users\\ababik\\Downloads\\chromedriver-win64/chromedriver.exe");
         driver = new ChromeDriver(options);
+        driver.manage().deleteAllCookies();
 
         ((JavascriptExecutor) driver).executeScript(
                 "Object.defineProperty(navigator, 'webdriver', {get: () => false});");
