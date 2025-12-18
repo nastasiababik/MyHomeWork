@@ -38,7 +38,7 @@ public class PobedaTests {
         options.addArguments("--incognito");
         driver = new ChromeDriver(options);
 
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10)).pageLoadTimeout(Duration.ofSeconds(30));
         shortWait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
     }
@@ -52,25 +52,24 @@ public class PobedaTests {
 
     @Test
     public void pobedaTest() {
-        /*
+
         driver.get("https://google.com");
 
-        WebElement searchBox = wait.until(ExpectedConditions.elementToBeClickable(By.name("q")));
+        WebElement searchBox = shortWait.until(ExpectedConditions.elementToBeClickable(By.name("q")));
         searchBox.sendKeys("Сайт компании Победа");
         searchBox.sendKeys(Keys.ENTER);
 
         //Дождаться результатов и кликнуть на первую ссылку
-        WebElement firstResult = wait.until(
+        WebElement firstResult = shortWait.until(
                 ExpectedConditions.elementToBeClickable(
-                        By.cssSelector("a[href='https://www.flypobeda.ru']")
+                        By.cssSelector("a[href='https://www.flypobeda.ru/']")
                 )
         );
-        assertEquals("https://www.flypobeda.ru", firstResult.getText());
 
 
         firstResult.click();
 
-         */
+
         driver.get("https://www.flypobeda.ru");
 
         //Дождаться загрузки страницы Победы и проверки текста на картинке
