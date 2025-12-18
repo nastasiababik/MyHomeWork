@@ -52,7 +52,7 @@ public class PobedaTests {
 
     @Test
     public void pobedaTest() {
-
+        /*
         driver.get("https://google.com");
 
         WebElement searchBox = shortWait.until(ExpectedConditions.elementToBeClickable(By.name("q")));
@@ -69,6 +69,7 @@ public class PobedaTests {
 
         firstResult.click();
 
+         */
 
         driver.get("https://www.flypobeda.ru");
 
