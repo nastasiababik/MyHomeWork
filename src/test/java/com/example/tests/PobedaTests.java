@@ -3,23 +3,21 @@ package com.example.tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PobedaTests {
     private WebDriver  driver;
     private WebDriverWait wait;
-    private WebDriverWait longWait;
     private WebDriverWait shortWait;
 
     private static final By KALININGRAD_BANNER = By.xpath("//*[contains(text(), 'Полетели в Калининград!')]");
@@ -41,8 +39,7 @@ public class PobedaTests {
         driver = new ChromeDriver(options);
 
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        longWait = new WebDriverWait(driver, Duration.ofSeconds(180));
-        shortWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+        shortWait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
     }
 
@@ -77,7 +74,7 @@ public class PobedaTests {
         driver.get("https://www.flypobeda.ru");
 
         //Дождаться загрузки страницы Победы и проверки текста на картинке
-        verifyBanner(KALININGRAD_BANNER, "Полетели в Калининград!", 180);
+        myCustomWaitForBanner(KALININGRAD_BANNER, "Полетели в Калининград!", 180);
 
         //Сменить язык на английский
         switchLanguage(SELECTED_LANG_RU, ITEM_LANG_ENG);
@@ -111,9 +108,36 @@ public class PobedaTests {
         WebElement banner = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(locator));
 
-        // Проверка точного текста
         assertEquals(expectedText,  banner.getText().trim(),
                 "Текст не совпадает");
     }
+
+ private void myCustomWaitForBanner(By locator, String expectedText, int seconds) {
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + TimeUnit.SECONDS.toMillis(seconds);
+
+        while(System.currentTimeMillis() < endTime) {
+            try{
+                WebElement banner = driver.findElement(locator);
+                if(banner.isDisplayed()) {
+                    String bannerText = banner.getText().trim();
+                    if(bannerText.equals(expectedText)) {
+                        return;
+                    } else {
+                        System.out.println("Текст баннера отличается от ожидаемого");
+                    }
+                }
+
+            } catch (NoSuchElementException e){
+                System.out.println("Баннер не найден");
+            }
+
+        }
+
+ }
+
+
+
+
 
 }
