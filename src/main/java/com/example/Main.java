@@ -1,10 +1,12 @@
 package com.example;
 
+import com.example.oop.products.*;
 import leetcode.Solution;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -17,10 +19,26 @@ public class Main {
         int[] nums = {1, 2, 3};
  //       moveZeroes(nums);
 
-        String s = "str";
-        String t = "tsr";
+     //   String s = "str";
+    //    String t = "tsr";
 
-        System.out.println(plusOne(nums));
+    //    System.out.println(plusOne(nums));
+
+       // создать заказ1
+        Order order = new Order();
+
+       // положить в заказ: товар1
+        order.addProduct(new DigitalProduct("eBook", 10, 1024));
+       // положить в заказ: [товар 2, товар3]
+        order.addProducts(List.of(new PhysicalProduct("notebook", 5, 2),
+                                    new DigitalProduct("music_album", 20, 30)));
+       // применить скидку 20% к заказу1
+        order.addDiscount(new FixedDiscount(5));
+        order.addDiscounts(List.of(new FixedDiscount(3), new PercentageDiscount(50)));
+       // применить скидку 10$ к заказу1
+       // посчитать сумму к оплате зазаказ1
+        System.out.println(order.calcTotalPrice());
+
 
 
 
@@ -167,7 +185,5 @@ public class Main {
         }
 
     }
-
-
 
 }
