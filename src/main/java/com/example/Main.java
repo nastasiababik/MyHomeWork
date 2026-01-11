@@ -2,9 +2,7 @@ package com.example;
 
 import leetcode.Solution;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -20,8 +18,11 @@ public class Main {
         String s = "str";
         String t = "tsr";
 
-        System.out.println(plusOne(nums));
+        String str = "Banana banana java cat";
+        String str2 = "dog java banana";
 
+
+       System.out.println(Arrays.toString(returnUniqWords(str, str2)));
 
 
     }
@@ -168,6 +169,38 @@ public class Main {
 
     }
 
+    public static String[] returnUniqWords(String s1, String s2){
+        //На вход 2 строки, разделитель пробел.
+        // "banana banana apple mango mango mango" и "house banana java apple".
+        //Вернуть все уникальные слова в сумме двух строк.
+        //Ответ: ["house","java"]
+
+        StringJoiner joiner = new StringJoiner(" ");
+        joiner.add(s1);
+        joiner.add(s2);
+        String[] words = joiner.toString().toLowerCase().split(" ");
+        HashMap<String, Integer> map = new HashMap<>();
+
+        for(String w: words){
+            if(!map.containsKey(w)){
+                map.put(w, 1);
+            } else {
+                map.put(w, map.get(w)+1);
+            }
+        }
+
+        List<String> result = new LinkedList<>();
+        for(String w : map.keySet()){
+            if(map.get(w)==1){
+                result.add(w);
+            }
+        }
+
+
+
+        return result.toArray(new String[0]);
+
+    }
 
 
 }
