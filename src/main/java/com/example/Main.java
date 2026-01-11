@@ -202,5 +202,42 @@ public class Main {
 
     }
 
+    public int search(int[] nums, int target) {
+        //найти середину массива [1, 3, 5, 7, 9, 11]
+        // сравнить значение из середины с искомым nums[2]=5
+        //если середина оказалась меньше, то сдвигаем левую границу на середину=1 : 5<7-> [3]
+        //если середина больше, то сдвигаем правую границу на середина-1: 5
+
+        /*
+        [1, 3, 5, 7, 9, 11]
+        left[0], right[5]
+        0+5=5/2->mid[2]=5
+        5<7-> сдвинуть left[2+1]-> left[3]
+
+        left[3], right[5]
+        (3+5)/2=mid[4]
+        9>7-> сдвинуть right[mid[4]-1]-> right[3]
+
+         */
+
+        int left = 0;
+        int right = nums.length-1;
+
+        while(left<=right){
+            int middle = (left+right)/2;
+
+            if(nums[middle]<target){
+                left= middle+1;
+            } else if(nums[middle]>target){
+                right=middle-1;
+            } else {
+                return middle;
+            }
+
+        }
+
+        return -1;
+
+    }
 
 }
